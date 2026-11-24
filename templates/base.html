@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Inventory{% endblock %} · Inventory Management System</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="{% block body_class %}{% endblock %}">
+{% if session.user_id %}
+  {# ===== header ===== #}
+  <aside class="sidebar">
+    <div class="brand">📦 Inventory</div>
+    <nav>
+    {% if session.role == 'customer' %}
+      <div class="nav-label">Belanja</div>
+      <a href="{{ url_for('shop') }}" class="{{ 'active' if request.endpoint == 'shop' }}">Katalog Produk</a>
+      <a href="{{ url_for('my_orders') }}" class="{{ 'active' if request.endpoint == 'my_orders' }}">Pesanan Saya</a>
+    {% else %}
+      <a href="{{ url_for('dashboard') }}" class="{{ 'active' if request.endpoint == 'dashboard' }}">Dashboard</a>
+      <div class="nav-label">Master</div>
+      <a href="{{ url_for('categories') }}" class="{{ 'active' if request.endpoint in ('categories','category_edit') }}">Kategori</a>
+      <a href="{{ url_for('suppliers') }}" class="{{ 'active' if request.endpoint in ('suppliers','supplier_edit') }}">Supplier</a>
+      <a href="{{ url_for('products') }}" class="{{ 'active' if request.endpoint in ('products','product_edit') }}">Produk</a>
+      <a href="{{ url_for('customers') }}" class="{{ 'active' if request.endpoint in ('customers','customer_edit') }}">Konsumen</a>
+      <div class="nav-label">Transaksi</div>
+      <a href="{{ url_for('orders') }}" class="{{ 'active' if request.endpoint == 'orders' }}">Pesanan Konsumen</a>
+      <a href="{{ url_for('transactions') }}" class="{{ 'active' if request.endpoint == 'transactions' }}">Barang Masuk / Keluar</a>
+      <div class="nav-label">Laporan</div>
+      <a href="{{ url_for('reports') }}" class="{{ 'active' if request.endpoint == 'reports' }}">Laporan</a>
+      {% if session.role == 'admin' %}
+      <div class="nav-label">Admin</div>
+      <a href="{{ url_for('users') }}" class="{{ 'active' if request.endpoint == 'users' }}">Pengguna</a>
+      {% endif %}
+    {% endif %}
+    </nav>
+    <div class="user-box">
+      <strong>{{ session.full_name }}</strong>
+      <span class="badge">{{ 'konsumen' if session.role == 'customer' else session.role }}</span>
+      <a href="{{ url_for('logout') }}" class="btn btn-sm btn-outline">Logout</a>
+    </div>
+  </aside>
+  <main class="content">
+{% else %}
+  <main class="content-center">
+{% endif %}
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+
+    {# ===== footer ===== #}
+    <footer class="footer">Inventory Management System · Flask &amp; MySQL · Tugas Proyek CRUD</footer>
+  </main>
+</body>
+</html>

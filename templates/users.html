@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Pengguna{% endblock %}
+{% block content %}
+<h1>Pengguna</h1>
+
+<div class="card">
+  <p class="muted">Atur peran akun. <strong>admin</strong> = semua akses, <strong>staff</strong> = kelola data tanpa hapus,
+     <strong>customer</strong> = konsumen (hanya katalog dan pesanan).</p>
+  <table>
+    <thead><tr><th>#</th><th>Username</th><th>Nama</th><th>Terdaftar</th><th>Peran</th></tr></thead>
+    <tbody>
+    {% for u in rows %}
+      <tr>
+        <td>{{ u.id }}</td><td>{{ u.username }}</td><td>{{ u.full_name }}</td><td>{{ u.created_at[:16] }}</td>
+        <td>
+          {% if u.id == session.user_id %}
+            <span class="badge-light">{{ u.role }} (akun Anda)</span>
+          {% else %}
+          <form method="post" action="{{ url_for('user_role', uid=u.id) }}" class="actions">
+            <select name="role" style="width:auto">
+              {% for r in ['admin', 'staff', 'customer'] %}
+              <option value="{{ r }}" {{ 'selected' if u.role == r }}>{{ r }}</option>
+              {% endfor %}
+            </select>
+            <button class="btn btn-sm" type="submit">Simpan</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

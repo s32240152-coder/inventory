@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Konsumen{% endblock %}
+{% block content %}
+<h1>Master Konsumen</h1>
+
+<div class="card">
+  <h2>{{ 'Edit Konsumen' if edit else 'Tambah Konsumen (pembeli langsung)' }}</h2>
+  <form method="post" action="{{ url_for('customer_edit', cid=edit.id) if edit else url_for('customers') }}" class="form-row">
+    <label>Nama <input type="text" name="name" value="{{ edit.name if edit }}" required></label>
+    <label>Telepon <input type="text" name="phone" value="{{ edit.phone or '' if edit }}"></label>
+    <label class="grow">Alamat <input type="text" name="address" value="{{ edit.address or '' if edit }}"></label>
+    <div class="actions">
+      <button class="btn" type="submit">{{ 'Simpan Perubahan' if edit else 'Tambah' }}</button>
+      {% if edit %}<a class="btn btn-outline" href="{{ url_for('customers') }}">Batal</a>{% endif %}
+    </div>
+  </form>
+  <p class="muted">Konsumen yang mendaftar sendiri masuk otomatis dan punya akun login.</p>
+</div>
+
+<div class="card">
+  <table>
+    <thead><tr><th>#</th><th>Nama</th><th>Telepon</th><th>Alamat</th><th>Akun</th><th class="num">Pesanan</th><th>Aksi</th></tr></thead>
+    <tbody>
+    {% for r in rows %}
+      <tr>
+        <td>{{ loop.index }}</td><td>{{ r.name }}</td><td>{{ r.phone or '-' }}</td><td>{{ r.address or '-' }}</td>
+        <td>{{ r.username or '-' }}</td><td class="num">{{ r.total_orders }}</td>
+        <td class="actions">
+          <a class="btn btn-sm" href="{{ url_for('customer_edit', cid=r.id) }}">Edit</a>
+          {% if session.role == 'admin' %}
+          <form method="post" action="{{ url_for('customer_delete', cid=r.id) }}" onsubmit="return confirm('Hapus konsumen ini?')">
+            <button class="btn btn-sm btn-danger" type="submit">Hapus</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="7" class="muted center">Belum ada konsumen.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

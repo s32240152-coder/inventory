@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Supplier{% endblock %}
+{% block content %}
+<h1>Master Supplier</h1>
+
+<div class="card">
+  <h2>{{ 'Edit Supplier' if edit else 'Tambah Supplier' }}</h2>
+  <form method="post" action="{{ url_for('supplier_edit', sid=edit.id) if edit else url_for('suppliers') }}" class="form-row">
+    <label>Nama <input type="text" name="name" value="{{ edit.name if edit }}" required></label>
+    <label>Telepon <input type="text" name="phone" value="{{ edit.phone or '' if edit }}"></label>
+    <label class="grow">Alamat <input type="text" name="address" value="{{ edit.address or '' if edit }}"></label>
+    <div class="actions">
+      <button class="btn" type="submit">{{ 'Simpan Perubahan' if edit else 'Tambah' }}</button>
+      {% if edit %}<a class="btn btn-outline" href="{{ url_for('suppliers') }}">Batal</a>{% endif %}
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <table>
+    <thead><tr><th>#</th><th>Nama</th><th>Telepon</th><th>Alamat</th><th>Aksi</th></tr></thead>
+    <tbody>
+    {% for r in rows %}
+      <tr>
+        <td>{{ loop.index }}</td><td>{{ r.name }}</td><td>{{ r.phone or '-' }}</td><td>{{ r.address or '-' }}</td>
+        <td class="actions">
+          <a class="btn btn-sm" href="{{ url_for('supplier_edit', sid=r.id) }}">Edit</a>
+          {% if session.role == 'admin' %}
+          <form method="post" action="{{ url_for('supplier_delete', sid=r.id) }}" onsubmit="return confirm('Hapus supplier ini?')">
+            <button class="btn btn-sm btn-danger" type="submit">Hapus</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="5" class="muted center">Belum ada supplier.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h1>Dashboard</h1>
+
+<div class="cards">
+  <div class="card stat"><span>Total Produk</span><strong>{{ stats.products }}</strong></div>
+  <div class="card stat"><span>Kategori</span><strong>{{ stats.categories }}</strong></div>
+  <div class="card stat"><span>Supplier</span><strong>{{ stats.suppliers }}</strong></div>
+  <div class="card stat"><span>Nilai Stok</span><strong>{{ stats.stock_value|rupiah }}</strong></div>
+  <div class="card stat {{ 'warn' if stats.low_stock }}"><span>Stok Menipis</span><strong>{{ stats.low_stock }}</strong></div>
+  <div class="card stat"><span>Transaksi Hari Ini</span><strong>{{ stats.trx_today }}</strong></div>
+  <a class="card stat {{ 'warn' if stats.pending_orders }}" href="{{ url_for('orders') }}"><span>Pesanan Menunggu</span><strong>{{ stats.pending_orders }}</strong></a>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <h2>⚠️ Stok Menipis</h2>
+    {% if low_stock %}
+    <table>
+      <thead><tr><th>Kode</th><th>Produk</th><th class="num">Stok</th><th class="num">Min</th></tr></thead>
+      <tbody>
+      {% for p in low_stock %}
+        <tr><td>{{ p.code }}</td><td>{{ p.name }}</td>
+            <td class="num danger-text">{{ p.stock }} {{ p.unit }}</td><td class="num">{{ p.min_stock }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p class="muted">Semua stok aman 👍</p>{% endif %}
+  </div>
+
+  <div class="card">
+    <h2>Transaksi Terakhir</h2>
+    {% if recent %}
+    <table>
+      <thead><tr><th>Waktu</th><th>Produk</th><th>Jenis</th><th class="num">Qty</th></tr></thead>
+      <tbody>
+      {% for t in recent %}
+        <tr><td>{{ t.created_at[:16] }}</td><td>{{ t.product_name }}</td>
+            <td><span class="tag tag-{{ t.type }}">{{ 'Masuk' if t.type == 'in' else 'Keluar' }}</span></td>
+            <td class="num">{{ t.quantity }} {{ t.unit }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p class="muted">Belum ada transaksi.</p>{% endif %}
+  </div>
+</div>
+{% endblock %}

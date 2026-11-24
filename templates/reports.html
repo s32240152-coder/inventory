@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Laporan{% endblock %}
+{% block content %}
+<h1>Laporan</h1>
+
+<div class="card no-print">
+  <form method="get" class="form-row">
+    <label>Jenis Laporan
+      <select name="jenis" onchange="this.form.submit()">
+        <option value="stok" {{ 'selected' if jenis == 'stok' }}>Stok Barang</option>
+        <option value="menipis" {{ 'selected' if jenis == 'menipis' }}>Stok Menipis</option>
+        <option value="masuk" {{ 'selected' if jenis == 'masuk' }}>Barang Masuk (Pembelian)</option>
+        <option value="keluar" {{ 'selected' if jenis == 'keluar' }}>Barang Keluar (Penjualan)</option>
+        <option value="konsumen" {{ 'selected' if jenis == 'konsumen' }}>Penjualan per Konsumen</option>
+      </select>
+    </label>
+    {% if jenis in ('masuk', 'keluar', 'konsumen') %}
+    <label>Dari <input type="date" name="from" value="{{ date_from }}"></label>
+    <label>Sampai <input type="date" name="to" value="{{ date_to }}"></label>
+    {% endif %}
+    <div class="actions">
+      <button class="btn" type="submit">Tampilkan</button>
+      <button class="btn btn-outline" type="button" onclick="window.print()">🖨️ Cetak</button>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  {% if jenis == 'stok' %}
+    <h2>Laporan Stok Barang</h2>
+    <table>
+      <thead><tr><th>Kode</th><th>Produk</th><th>Kategori</th><th class="num">Harga</th><th class="num">Stok</th><th class="num">Nilai Stok</th></tr></thead>
+      <tbody>
+      {% for r in data %}
+        <tr><td>{{ r.code }}</td><td>{{ r.name }}</td><td>{{ r.category_name or '-' }}</td>
+            <td class="num">{{ r.price|rupiah }}</td><td class="num">{{ r.stock }} {{ r.unit }}</td>
+            <td class="num">{{ (r.price * r.stock)|rupiah }}</td></tr>
+      {% else %}<tr><td colspan="6" class="muted center">Tidak ada data.</td></tr>{% endfor %}
+      </tbody>
+      <tfoot><tr><th colspan="4">Total</th><th class="num">{{ total.qty }}</th><th class="num">{{ total.value|rupiah }}</th></tr></tfoot>
+    </table>
+
+  {% elif jenis == 'menipis' %}
+    <h2>Laporan Stok Menipis</h2>
+    <table>
+      <thead><tr><th>Kode</th><th>Produk</th><th>Supplier</th><th class="num">Stok</th><th class="num">Minimum</th></tr></thead>
+      <tbody>
+      {% for r in data %}
+        <tr><td>{{ r.code }}</td><td>{{ r.name }}</td><td>{{ r.supplier_name or '-' }}</td>
+            <td class="num danger-text">{{ r.stock }} {{ r.unit }}</td><td class="num">{{ r.min_stock }}</td></tr>
+      {% else %}<tr><td colspan="5" class="muted center">Semua stok aman 👍</td></tr>{% endfor %}
+      </tbody>
+    </table>
+
+  {% elif jenis == 'konsumen' %}
+    <h2>Laporan Penjualan per Konsumen</h2>
+    <p class="muted">Dihitung dari pesanan yang sudah diproses.{% if date_from or date_to %} Periode: {{ date_from or '...' }} s/d {{ date_to or '...' }}{% endif %}</p>
+    <table>
+      <thead><tr><th>Konsumen</th><th>Telepon</th><th class="num">Jumlah Pesanan</th><th class="num">Total Barang</th><th class="num">Total Belanja</th></tr></thead>
+      <tbody>
+      {% for r in data %}
+        <tr><td>{{ r.name }}</td><td>{{ r.phone or '-' }}</td><td class="num">{{ r.total_orders }}</td>
+            <td class="num">{{ r.total_qty }}</td><td class="num">{{ r.total_value|rupiah }}</td></tr>
+      {% else %}<tr><td colspan="5" class="muted center">Belum ada pesanan yang diproses.</td></tr>{% endfor %}
+      </tbody>
+      <tfoot><tr><th colspan="2">Total</th><th class="num">{{ total.orders }}</th><th class="num">{{ total.qty }}</th><th class="num">{{ total.value|rupiah }}</th></tr></tfoot>
+    </table>
+
+  {% else %}
+    <h2>Laporan {{ 'Pembelian (Barang Masuk)' if jenis == 'masuk' else 'Penjualan (Barang Keluar)' }}</h2>
+    {% if date_from or date_to %}<p class="muted">Periode: {{ date_from or '...' }} s/d {{ date_to or '...' }}</p>{% endif %}
+    <table>
+      <thead><tr><th>Waktu</th><th>Produk</th><th class="num">Qty</th><th class="num">Harga</th><th class="num">Subtotal</th><th>Catatan</th><th>Petugas</th></tr></thead>
+      <tbody>
+      {% for r in data %}
+        <tr><td>{{ r.created_at[:16] }}</td><td>{{ r.code }} - {{ r.product_name }}</td>
+            <td class="num">{{ r.quantity }} {{ r.unit }}</td><td class="num">{{ r.price|rupiah }}</td>
+            <td class="num">{{ (r.quantity * r.price)|rupiah }}</td><td>{{ r.note or '-' }}</td><td>{{ r.user_name or '-' }}</td></tr>
+      {% else %}<tr><td colspan="7" class="muted center">Tidak ada data pada periode ini.</td></tr>{% endfor %}
+      </tbody>
+      <tfoot><tr><th colspan="2">Total</th><th class="num">{{ total.qty }}</th><th></th><th class="num">{{ total.value|rupiah }}</th><th colspan="2"></th></tr></tfoot>
+    </table>
+  {% endif %}
+</div>
+{% endblock %}

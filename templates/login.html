@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<div class="auth-card">
+  <h1>📦 Inventory System</h1>
+  <p class="muted">Silakan login untuk melanjutkan</p>
+  <form method="post">
+    <label>Username
+      <input type="text" name="username" required autofocus>
+    </label>
+    <label>Password
+      <input type="password" name="password" required>
+    </label>
+    <button class="btn btn-block" type="submit">Login</button>
+  </form>
+  <p class="muted center">Konsumen baru? <a href="{{ url_for('register') }}">Daftar di sini</a></p>
+  <p class="hint"><code></code><code></code></p>
+</div>
+{% endblock %}

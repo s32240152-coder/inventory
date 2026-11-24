@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+{% block content %}
+<div class="auth-card">
+  <h1>Daftar Konsumen</h1>
+  <p class="muted">Buat akun untuk memesan produk. Akun petugas diatur oleh admin.</p>
+  <form method="post">
+    <label>Nama Lengkap
+      <input type="text" name="full_name" required autofocus>
+    </label>
+    <label>Username
+      <input type="text" name="username" required>
+    </label>
+    <label>No. Telepon
+      <input type="text" name="phone">
+    </label>
+    <label>Alamat
+      <input type="text" name="address">
+    </label>
+    <label>Password (min. 6 karakter)
+      <input type="password" name="password" minlength="6" required>
+    </label>
+    <label>Konfirmasi Password
+      <input type="password" name="confirm" minlength="6" required>
+    </label>
+    <button class="btn btn-block" type="submit">Daftar</button>
+  </form>
+  <p class="muted center">Sudah punya akun? <a href="{{ url_for('login') }}">Login</a></p>
+</div>
+{% endblock %}

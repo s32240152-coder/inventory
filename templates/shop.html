@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Katalog{% endblock %}
+{% block content %}
+<h1>Katalog Produk</h1>
+
+<div class="card">
+  <form method="get" class="search" style="margin:0">
+    <input type="text" name="q" value="{{ q }}" placeholder="Cari kode / nama produk...">
+    <button class="btn btn-sm" type="submit">Cari</button>
+    {% if q %}<a class="btn btn-sm btn-outline" href="{{ url_for('shop') }}">Reset</a>{% endif %}
+  </form>
+</div>
+
+<form method="post" class="card">
+  <table>
+    <thead><tr><th>Kode</th><th>Produk</th><th>Kategori</th><th class="num">Harga</th><th class="num">Stok</th><th class="num">Jumlah Pesan</th></tr></thead>
+    <tbody>
+    {% for r in rows %}
+      <tr>
+        <td>{{ r.code }}</td><td>{{ r.name }}</td><td>{{ r.category_name or '-' }}</td>
+        <td class="num">{{ r.price|rupiah }}</td>
+        <td class="num {{ 'danger-text' if r.stock == 0 }}">{{ r.stock }} {{ r.unit }}</td>
+        <td class="num">
+          {% if r.stock > 0 %}
+          <input type="number" name="qty_{{ r.id }}" min="0" max="{{ r.stock }}" value="0" class="qty">
+          {% else %}<span class="muted">Habis</span>{% endif %}
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="6" class="muted center">Produk tidak ditemukan.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <div class="form-row" style="margin-top:16px">
+    <label class="grow">Catatan untuk petugas (opsional)
+      <input type="text" name="note" placeholder="mis. kirim sore hari">
+    </label>
+    <div class="actions"><button class="btn" type="submit">Buat Pesanan</button></div>
+  </div>
+  <p class="muted">Isi jumlah pada produk yang ingin dipesan. Pesanan akan diproses petugas.</p>
+</form>
+{% endblock %}

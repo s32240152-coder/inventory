@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Kategori{% endblock %}
+{% block content %}
+<h1>Master Kategori</h1>
+
+<div class="card">
+  <h2>{{ 'Edit Kategori' if edit else 'Tambah Kategori' }}</h2>
+  <form method="post" action="{{ url_for('category_edit', cid=edit.id) if edit else url_for('categories') }}" class="form-row">
+    <label>Nama <input type="text" name="name" value="{{ edit.name if edit }}" required></label>
+    <label class="grow">Deskripsi <input type="text" name="description" value="{{ edit.description or '' if edit }}"></label>
+    <div class="actions">
+      <button class="btn" type="submit">{{ 'Simpan Perubahan' if edit else 'Tambah' }}</button>
+      {% if edit %}<a class="btn btn-outline" href="{{ url_for('categories') }}">Batal</a>{% endif %}
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <table>
+    <thead><tr><th>#</th><th>Nama</th><th>Deskripsi</th><th class="num">Jumlah Produk</th><th>Aksi</th></tr></thead>
+    <tbody>
+    {% for r in rows %}
+      <tr>
+        <td>{{ loop.index }}</td><td>{{ r.name }}</td><td>{{ r.description or '-' }}</td>
+        <td class="num">{{ r.total_products }}</td>
+        <td class="actions">
+          <a class="btn btn-sm" href="{{ url_for('category_edit', cid=r.id) }}">Edit</a>
+          {% if session.role == 'admin' %}
+          <form method="post" action="{{ url_for('category_delete', cid=r.id) }}" onsubmit="return confirm('Hapus kategori ini?')">
+            <button class="btn btn-sm btn-danger" type="submit">Hapus</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="5" class="muted center">Belum ada kategori.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

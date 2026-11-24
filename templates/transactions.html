@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Transaksi{% endblock %}
+{% block content %}
+<h1>Transaksi Barang</h1>
+
+<div class="card">
+  <h2>Catat Transaksi Baru</h2>
+  <form method="post" class="form-grid">
+    <label>Jenis
+      <select name="type" required>
+        <option value="in">Barang Masuk (pembelian)</option>
+        <option value="out">Barang Keluar (penjualan)</option>
+      </select>
+    </label>
+    <label>Produk
+      <select name="product_id" id="product" required>
+        <option value="">- pilih produk -</option>
+        {% for p in prods %}
+        <option value="{{ p.id }}" data-price="{{ p.price|int }}">{{ p.code }} - {{ p.name }} (stok {{ p.stock }} {{ p.unit }})</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Jumlah <input type="number" name="quantity" min="1" value="1" required></label>
+    <label>Harga Satuan (Rp) <input type="number" name="price" id="price" min="0" step="any" placeholder="otomatis dari master"></label>
+    <label class="span-all">Catatan <input type="text" name="note" placeholder="mis. No. faktur / nama pembeli"></label>
+    <div class="actions span-all"><button class="btn" type="submit">Simpan Transaksi</button></div>
+  </form>
+</div>
+
+<div class="card">
+  <h2>100 Transaksi Terakhir</h2>
+  <table>
+    <thead><tr><th>#</th><th>Waktu</th><th>Produk</th><th>Jenis</th><th class="num">Qty</th><th class="num">Harga</th><th>Catatan</th><th>Petugas</th><th></th></tr></thead>
+    <tbody>
+    {% for t in rows %}
+      <tr>
+        <td>{{ t.id }}</td><td>{{ t.created_at[:16] }}</td><td>{{ t.code }} - {{ t.product_name }}</td>
+        <td><span class="tag tag-{{ t.type }}">{{ 'Masuk' if t.type == 'in' else 'Keluar' }}</span></td>
+        <td class="num">{{ t.quantity }} {{ t.unit }}</td><td class="num">{{ t.price|rupiah }}</td>
+        <td>{{ t.note or '-' }}</td><td>{{ t.user_name or '-' }}</td>
+        <td>
+          {% if session.role == 'admin' %}
+          <form method="post" action="{{ url_for('transaction_delete', tid=t.id) }}" onsubmit="return confirm('Batalkan transaksi ini? Stok akan disesuaikan.')">
+            <button class="btn btn-sm btn-danger" type="submit">Batal</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="9" class="muted center">Belum ada transaksi.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+  // isi otomatis harga satuan dari master produk
+  document.getElementById('product').addEventListener('change', function () {
+    var opt = this.options[this.selectedIndex];
+    document.getElementById('price').value = opt.dataset.price || '';
+  });
+</script>
+{% endblock %}
